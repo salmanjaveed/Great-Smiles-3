@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Great Smiles Dental – Frisco, TX</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --navy:#1B3070;
+    --navy-light:#2A4098;
+    --navy-dark:#12214E;
+    --red:#CC2229;
+    --red-light:#E8353D;
+    --cream:#FDFCF8;
+    --gray-light:#F5F4F0;
+    --gray-mid:#E8E6E0;
+    --text:#111827;
+    --text-muted:#6B7280;
+    --text-light:#9CA3AF;
+    --white:#FFFFFF;
+    --shadow-sm:0 1px 3px rgba(27,48,112,0.08),0 1px 2px rgba(27,48,112,0.06);
+    --shadow-md:0 4px 20px rgba(27,48,112,0.10),0 2px 8px rgba(27,48,112,0.08);
+    --shadow-lg:0 10px 40px rgba(27,48,112,0.14),0 4px 12px rgba(27,48,112,0.10);
+    --radius:12px;
+    --radius-lg:20px;
+  }
+  html{scroll-behavior:smooth;}
+  body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;}
+  ::selection{background:rgba(27,48,112,0.15);}
+  img{max-width:100%;}
+  a{text-decoration:none;color:inherit;}
+  /* Animations */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.03);}}
+  .animate-fadeUp{animation:fadeUp 0.7s ease both;}
+  .animate-fadeIn{animation:fadeIn 0.5s ease both;}
+  .delay-1{animation-delay:0.1s;}
+  .delay-2{animation-delay:0.2s;}
+  .delay-3{animation-delay:0.3s;}
+  .delay-4{animation-delay:0.4s;}
+  .delay-5{animation-delay:0.5s;}
+  /* Scrollbar */
+  ::-webkit-scrollbar{width:6px;}
+  ::-webkit-scrollbar-track{background:var(--gray-light);}
+  ::-webkit-scrollbar-thumb{background:var(--navy-light);border-radius:3px;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 80 56" xmlns="http://www.w3.org/2000/svg">
+    <rect width="80" height="56" fill="#1B3070"/>
+    <text x="40" y="32" text-anchor="middle" fill="white" font-size="10" font-weight="bold">GS</text>
+    <path d="M30,38 Q40,28 50,38 Q52,44 40,46 Q28,44 30,38Z" fill="#CC2229" opacity="0.8"/>
+  </svg>
+</template>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── DESIGN TOKENS ────────────────────────────────────────────────────────────
+const C = {
+  navy:'#1B3070', navyLight:'#2A4098', navyDark:'#12214E',
+  red:'#CC2229', redLight:'#E8353D',
+  cream:'#FDFCF8', grayLight:'#F5F4F0', grayMid:'#E8E6E0',
+  text:'#111827', textMuted:'#6B7280', textLight:'#9CA3AF', white:'#FFFFFF',
+};
+
+// ── SHARED COMPONENTS ────────────────────────────────────────────────────────
+function Btn({children, variant='primary', onClick, style={}, small=false}){
+  const [hov,setHov]=useState(false);
+  const base={
+    display:'inline-flex',alignItems:'center',gap:'8px',cursor:'pointer',
+    border:'none',fontFamily:'Inter,sans-serif',fontWeight:600,
+    transition:'all 0.25s ease',letterSpacing:'0.01em',
+    borderRadius:'50px',
+  };
+  const sizes={padding:small?'10px 22px':'14px 32px',fontSize:small?'13px':'15px'};
+  const variants={
+    primary:{background:hov?C.redLight:C.red,color:C.white,boxShadow:hov?'0 8px 25px rgba(204,34,41,0.4)':'0 4px 15px rgba(204,34,41,0.25)',transform:hov?'translateY(-2px)':'none'},
+    outline:{background:'transparent',color:C.white,border:'2px solid rgba(255,255,255,0.7)',backdropFilter:'blur(8px)',transform:hov?'translateY(-2px)':'none',opacity:hov?1:0.9},
+    navy:{background:hov?C.navyLight:C.navy,color:C.white,boxShadow:hov?'0 8px 25px rgba(27,48,112,0.4)':'0 4px 15px rgba(27,48,112,0.2)',transform:hov?'translateY(-2px)':'none'},
+    ghost:{background:'transparent',color:C.navy,border:`2px solid ${C.navy}`,transform:hov?'translateY(-2px)':'none',boxShadow:hov?'0 4px 15px rgba(27,48,112,0.15)':'none'},
+  };
+  return <button onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} onClick={onClick} style={{...base,...sizes,...variants[variant],...style}}>{children}</button>;
+}
+
+function SectionTag({children}){
+  return <div style={{display:'inline-flex',alignItems:'center',gap:'8px',marginBottom:'12px'}}>
+    <div style={{width:'30px',height:'2px',background:C.red,borderRadius:'2px'}}></div>
+    <span style={{fontSize:'12px',fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.red}}>{children}</span>
+    <div style={{width:'30px',height:'2px',background:C.red,borderRadius:'2px'}}></div>
+  </div>;
+}
+
+function Heading({children, level=2, light=false, center=false, style={}}){
+  const Tag=`h${level}`;
+  const sizes={1:{fontSize:'clamp(2.4rem,5vw,3.8rem)',lineHeight:1.1},2:{fontSize:'clamp(1.8rem,3.5vw,2.6rem)',lineHeight:1.2},3:{fontSize:'clamp(1.3rem,2.5vw,1.6rem)',lineHeight:1.3}};
+  return <Tag style={{fontFamily:'Playfair Display,serif',fontWeight:700,color:light?C.white:C.navy,textAlign:center?'center':'left',...sizes[level],...style}}>{children}</Tag>;
+}
+
+function ImgPlaceholder({label,width='100%',height='280px',style={}}){
+  return <div style={{width,height,background:`linear-gradient(135deg,${C.navyDark}22,${C.navy}18)`,border:`1px solid ${C.grayMid}`,borderRadius:'inherit',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'8px',overflow:'hidden',...style}}>
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="2" y="2" width="32" height="32" rx="6" stroke={C.textLight} strokeWidth="1.5"/><path d="M2 24l8-8 6 6 5-5 11 11" stroke={C.textLight} strokeWidth="1.5" strokeLinecap="round"/><circle cx="11" cy="13" r="3" stroke={C.textLight} strokeWidth="1.5"/></svg>
+    <span style={{fontSize:'11px',color:C.textLight,fontFamily:'monospace',textAlign:'center',padding:'0 12px'}}>{label}</span>
+  </div>;
+}
+
+// ── HEADER ───────────────────────────────────────────────────────────────────
+const NAV=[{label:'Home',page:'home'},{label:'About',page:'about'},{label:'Services',page:'services',sub:['General Dentistry','Cosmetic Dentistry','Restorative Dentistry','Pediatric Dentistry']},{label:'Book Appointment',page:'book'},{label:'Contact',page:'contact'}];
+
+function Header({page,setPage,tweaks}){
+  const [scrolled,setScrolled]=useState(false);
+  const [menuOpen,setMenuOpen]=useState(false);
+  const [dropdown,setDropdown]=useState(null);
+  useEffect(()=>{
+    const fn=()=>setScrolled(window.scrollY>40);
+    window.addEventListener('scroll',fn);return()=>window.removeEventListener('scroll',fn);
+  },[]);
+  const isHome=page==='home';
+  const solid=scrolled||!isHome;
+  const bg=solid?`rgba(255,255,255,0.97)`:'transparent';
+  const shadow=solid?'0 2px 20px rgba(27,48,112,0.10)':'none';
+  const textColor=solid?C.navy:C.white;
+  return <header style={{position:'fixed',top:0,left:0,right:0,zIndex:1000,background:bg,boxShadow:shadow,backdropFilter:scrolled?'blur(12px)':'none',transition:'all 0.35s ease'}}>
+    <div style={{maxWidth:'1200px',margin:'0 auto',padding:'0 24px',display:'flex',alignItems:'center',justifyContent:'space-between',height:scrolled?'68px':'80px',transition:'height 0.35s ease'}}>
+      {/* Logo */}
+      <div onClick={()=>setPage('home')} style={{cursor:'pointer',display:'flex',alignItems:'center',gap:'10px'}}>
+        <img src="uploads/great-smiles-dental-new-logo.png" alt="Great Smiles Dental" style={{height:solid?'44px':'52px',transition:'height 0.35s ease',filter:solid?'none':'brightness(0) invert(1)'}}/>
+      </div>
+      {/* Desktop Nav */}
+      <nav style={{display:'flex',alignItems:'center',gap:'6px'}}>
+        {NAV.map(n=><div key={n.page} style={{position:'relative'}} onMouseEnter={()=>n.sub&&setDropdown(n.page)} onMouseLeave={()=>setDropdown(null)}>
+          <button onClick={()=>{setPage(n.page);setDropdown(null);}} style={{background:'none',border:'none',cursor:'pointer',padding:'8px 14px',fontSize:'14px',fontWeight:500,color:textColor,fontFamily:'Inter,sans-serif',borderRadius:'8px',transition:'all 0.2s',opacity:page===n.page?1:0.85,borderBottom:page===n.page?`2px solid ${C.red}`:'2px solid transparent'}}>
+            {n.label}{n.sub&&<span style={{marginLeft:'4px',fontSize:'10px'}}>▾</span>}
+          </button>
+          {n.sub&&dropdown===n.page&&<div style={{position:'absolute',top:'100%',left:0,background:C.white,borderRadius:'12px',boxShadow:'0 8px 30px rgba(27,48,112,0.15)',padding:'8px',minWidth:'220px',animation:'slideDown 0.2s ease'}}>
+            {n.sub.map(s=><div key={s} onClick={()=>{setPage('services');setDropdown(null);}} style={{padding:'10px 16px',fontSize:'14px',color:C.text,borderRadius:'8px',cursor:'pointer',transition:'background 0.15s'}} onMouseEnter={e=>e.target.style.background=C.grayLight} onMouseLeave={e=>e.target.style.background='transparent'}>{s}</div>)}
+          </div>}
+        </div>)}
+        <Btn onClick={()=>setPage('book')} small style={{marginLeft:'8px'}}>Book Now</Btn>
+      </nav>
+    </div>
+  </header>;
+}
+
+// ── HOME PAGE ────────────────────────────────────────────────────────────────
+function Hero({setPage}){
+  const [scrollY,setScrollY]=useState(0);
+  useEffect(()=>{const fn=()=>setScrollY(window.scrollY);window.addEventListener('scroll',fn,{passive:true});return()=>window.removeEventListener('scroll',fn);},[]);
+  return <section style={{position:'relative',height:'100vh',minHeight:'600px',display:'flex',alignItems:'center',overflow:'hidden'}}>
+    {/* Parallax BG */}
+    <div style={{position:'absolute',inset:0,transform:`translateY(${scrollY*0.4}px)`,transition:'transform 0.1s linear'}}>
+      <img src="https://images.unsplash.com/photo-1629909615184-74f495363b67?w=1920&q=80" alt="" style={{width:'100%',height:'120%',objectFit:'cover',objectPosition:'center top'}} onError={e=>{e.target.style.display='none';}}/>
+      <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg, rgba(10,10,18,0.78) 0%, rgba(20,20,35,0.60) 55%, rgba(10,10,18,0.65) 100%)'}}></div>
+    </div>
+    {/* Decorative shapes */}
+    <div style={{position:'absolute',right:'-100px',top:'50%',transform:'translateY(-50%)',width:'500px',height:'500px',borderRadius:'50%',background:'rgba(204,34,41,0.08)',filter:'blur(60px)',pointerEvents:'none'}}></div>
+    <div style={{position:'absolute',left:'-60px',bottom:'10%',width:'300px',height:'300px',borderRadius:'50%',background:'rgba(42,64,152,0.15)',filter:'blur(50px)',pointerEvents:'none'}}></div>
+    <div style={{position:'relative',zIndex:2,maxWidth:'1200px',margin:'0 auto',padding:'0 24px',width:'100%'}}>
+      <div style={{maxWidth:'680px'}}>
+        <div className="animate-fadeUp" style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'20px'}}>
+          <div style={{width:'40px',height:'2px',background:C.red}}></div>
+          <span style={{fontSize:'13px',fontWeight:600,letterSpacing:'0.14em',textTransform:'uppercase',color:'rgba(255,255,255,0.75)'}}>Frisco, Texas • Family Dentistry</span>
+        </div>
+        <Heading level={1} light className="animate-fadeUp delay-1" style={{marginBottom:'20px',lineHeight:1.08}}>
+          Your Confident<br/><em style={{color:'#E8A4A7',fontStyle:'italic'}}>Smile</em> Starts Here
+        </Heading>
+        <p className="animate-fadeUp delay-2" style={{fontSize:'clamp(1rem,2vw,1.2rem)',color:'rgba(255,255,255,0.82)',lineHeight:1.7,marginBottom:'36px',maxWidth:'520px'}}>
+          Premium, compassionate dental care for the whole family. Experience the difference that gentle expertise and modern technology make.
+        </p>
+        <div className="animate-fadeUp delay-3" style={{display:'flex',gap:'16px',flexWrap:'wrap'}}>
+          <Btn onClick={()=>setPage('book')} style={{fontSize:'16px',padding:'16px 36px'}}>📅 Book Appointment</Btn>
+          <Btn variant="outline" onClick={()=>window.open('tel:+14695550100')} style={{fontSize:'16px',padding:'16px 36px'}}>📞 (469) 555-0100</Btn>
+        </div>
+        {/* Trust pills */}
+        <div className="animate-fadeUp delay-4" style={{display:'flex',gap:'20px',marginTop:'48px',flexWrap:'wrap'}}>
+          {['⭐ 500+ 5-Star Reviews','✓ Insurance Accepted','✓ Same-Day Emergency'].map(t=><div key={t} style={{background:'rgba(255,255,255,0.10)',backdropFilter:'blur(8px)',border:'1px solid rgba(255,255,255,0.20)',borderRadius:'50px',padding:'8px 18px',fontSize:'13px',color:'rgba(255,255,255,0.90)',fontWeight:500}}>{t}</div>)}
+        </div>
+      </div>
+    </div>
+    {/* Scroll indicator */}
+    <div style={{position:'absolute',bottom:'32px',left:'50%',transform:'translateX(-50%)',display:'flex',flexDirection:'column',alignItems:'center',gap:'8px',opacity:0.6}}>
+      <span style={{fontSize:'11px',color:'white',letterSpacing:'0.1em',textTransform:'uppercase'}}>Scroll</span>
+      <div style={{width:'1px',height:'40px',background:'rgba(255,255,255,0.4)',animation:'pulse 2s infinite'}}></div>
+    </div>
+  </section>;
+}
+
+function DrName({children, light=false}){
+  return <span style={{
+    color: light ? '#FFD580' : C.red,
+    fontWeight:700,
+    fontStyle:'italic',
+    fontFamily:'Playfair Display,serif',
+    borderBottom: `1.5px solid ${light ? '#FFD58060' : C.red+'50'}`,
+    paddingBottom:'1px',
+    letterSpacing:'0.01em',
+  }}>{children}</span>;
+}
+
+function useCountUp(target, duration=2200, inView=false){
+  const [val,setVal]=useState(0);
+  useEffect(()=>{
+    if(!inView)return;
+    // Tick-based: updates every ~40ms for a visible "clicking" effect
+    const ticks=duration/40;
+    let tick=0;
+    const id=setInterval(()=>{
+      tick++;
+      const p=Math.min(tick/ticks,1);
+      const ease=1-Math.pow(1-p,4);
+      setVal(Math.floor(ease*target));
+      if(p>=1)clearInterval(id);
+    },40);
+    return()=>clearInterval(id);
+  },[inView,target,duration]);
+  return val;
+}
+
+function StatItem({n,label}){
+  const ref=useRef(null);
+  const [inView,setInView]=useState(false);
+  const [done,setDone]=useState(false);
+  useEffect(()=>{
+    const obs=new IntersectionObserver(([e])=>{if(e.isIntersecting){setInView(true);obs.disconnect();}},{threshold:0.3});
+    if(ref.current)obs.observe(ref.current);
+    return()=>obs.disconnect();
+  },[]);
+  const match=n.match(/^([\d,]+)(\+|%)?$/);
+  const numericTarget=match?parseInt(match[1].replace(',',''),10):null;
+  const suffix=match?(match[2]||''):'';
+  const count=useCountUp(numericTarget||0,2200,inView);
+  useEffect(()=>{if(inView&&numericTarget!=null&&count>=numericTarget)setDone(true);},[count,inView,numericTarget]);
+  const display=numericTarget!=null?(numericTarget>=1000?count.toLocaleString():count)+suffix:n;
+  const counting=inView&&!done;
+  return <div ref={ref} style={{textAlign:'center',padding:'16px 8px',transition:'transform 0.3s',transform:counting?'scale(1.06)':'scale(1)'}}>
+    <div style={{
+      fontFamily:'Playfair Display,serif',fontSize:'2.4rem',fontWeight:700,lineHeight:1,
+      color:C.white,
+      textShadow:counting?`0 0 20px rgba(255,255,255,0.5),0 0 40px rgba(255,200,200,0.3)`:'none',
+      transition:'text-shadow 0.3s,font-size 0.2s',
+      opacity:inView?1:0,
+    }}>{display}</div>
+    <div style={{fontSize:'13px',color:'rgba(255,255,255,0.65)',marginTop:'8px',fontWeight:500,letterSpacing:'0.02em'}}>{label}</div>
+  </div>;
+}
+
+function TrustBar(){
+  const stats=[{n:'15+',label:'Years of Excellence'},{n:'8000+',label:'Happy Patients'},{n:'98%',label:'Patient Satisfaction'},{n:'30+',label:'Services Offered'}];
+  return <section style={{background:C.navy,padding:'28px 24px'}}>
+    <div style={{maxWidth:'1200px',margin:'0 auto',display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'16px'}}>
+      {stats.map(s=><StatItem key={s.n} {...s}/>)}
+    </div>
+  </section>;
+}
+
+function InsuranceBar(){
+  const ins=['Aetna','Delta Dental','Cigna','BlueCross','MetLife','United Healthcare'];
+  return <section style={{background:C.white,borderBottom:`1px solid ${C.grayMid}`,padding:'20px 24px'}}>
+    <div style={{maxWidth:'1200px',margin:'0 auto',display:'flex',alignItems:'center',gap:'32px',flexWrap:'wrap',justifyContent:'center'}}>
+      <span style={{fontSize:'13px',fontWeight:700,color:C.textMuted,letterSpacing:'0.08em',textTransform:'uppercase',flexShrink:0}}>Insurance Accepted:</span>
+      {ins.map(i=><div key={i} style={{padding:'8px 20px',border:`1px solid ${C.grayMid}`,borderRadius:'8px',fontSize:'13px',fontWeight:600,color:C.textMuted,background:C.grayLight}}>{i}</div>)}
+      <span style={{fontSize:'13px',color:C.red,fontWeight:600,cursor:'pointer'}}>+ Many More</span>
+    </div>
+  </section>;
+}
+
+function AboutPreview({setPage}){
+  return <section style={{padding:'100px 24px',background:C.cream}}>
+    <div style={{maxWidth:'1200px',margin:'0 auto',display:'grid',gridTemplateColumns:'1fr 1fr',gap:'80px',alignItems:'center'}}>
+      <div style={{position:'relative'}}>
+        <div style={{position:'absolute',top:'-20px',left:'-20px',width:'240px',height:'240px',background:`linear-gradient(135deg,${C.navy}15,${C.red}08)`,borderRadius:'50%',zIndex:0}}></div>
+        {/* Main large image */}
+        <div style={{position:'relative',zIndex:1,borderRadius:'20px',overflow:'hidden',boxShadow:'0 20px 60px rgba(27,48,112,0.18)'}}>
+          <img src="uploads/dental-implant-1.jpg" alt="Happy patient" style={{width:'100%',height:'420px',objectFit:'cover',objectPosition:'center top',display:'block'}}/>
+        </div>
+        {/* Smaller overlapping image */}
+        <div style={{position:'absolute',bottom:'-28px',right:'-28px',width:'190px',height:'140px',borderRadius:'14px',overflow:'hidden',boxShadow:'0 10px 35px rgba(27,48,112,0.22)',border:`3px solid ${C.white}`,zIndex:3}}>
+          <img src="uploads/about-us.jpg" alt="Our clinic" style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'center'}}/>
+        </div>
+        {/* Badge */}
+        <div style={{position:'absolute',top:'20px',left:'-20px',background:C.navy,borderRadius:'14px',padding:'14px 18px',boxShadow:'0 8px 30px rgba(27,48,112,0.28)',zIndex:4,textAlign:'center'}}>
+          <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.8rem',fontWeight:700,color:C.white,lineHeight:1}}>15+</div>
+          <div style={{fontSize:'11px',color:'rgba(255,255,255,0.70)',fontWeight:500,marginTop:'4px'}}>Years of Care</div>
+        </div>
+      </div>
+      <div>
+        <SectionTag>About Us</SectionTag>
+        <Heading level={2} style={{marginBottom:'20px'}}>Caring for Smiles in<br/>Frisco Since 2009</Heading>
+        <p style={{color:C.textMuted,lineHeight:1.8,marginBottom:'20px',fontSize:'1.05rem'}}>
+          At The Great Smiles Dental, we believe every patient deserves a healthy, beautiful smile delivered with compassion and expertise. Our state-of-the-art Frisco practice combines the warmth of a family dentist with the precision of modern technology.
+        </p>
+        <p style={{color:C.textMuted,lineHeight:1.8,marginBottom:'32px',fontSize:'1.05rem'}}>
+          Led by <DrName>Dr. Zakia Sultana</DrName>, our dedicated team is committed to making every visit comfortable, transparent, and effective — from first check-up to final smile.
+        </p>
+        <div style={{display:'flex',gap:'24px',marginBottom:'36px'}}>
+          {['Patient-First','Transparent Pricing','Gentle Touch'].map(v=><div key={v} style={{display:'flex',alignItems:'center',gap:'8px'}}>
+            <div style={{width:'20px',height:'20px',borderRadius:'50%',background:C.red,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',color:'white',flexShrink:0}}>✓</div>
+            <span style={{fontSize:'14px',fontWeight:500,color:C.text}}>{v}</span>
+          </div>)}
+        </div>
+        <Btn variant="navy" onClick={()=>setPage('about')}>Meet Our Team →</Btn>
+      </div>
+    </div>
+  </section>;
+}
+
+function ServicesOverview({setPage}){
+  const services=[
+    {icon:'🦷',title:'Dental Implants',desc:'Permanent, natural-looking tooth replacements that restore your smile and confidence.'},
+    {icon:'✨',title:'Invisalign',desc:'Clear, comfortable aligners to straighten teeth without traditional metal braces.'},
+    {icon:'🪥',title:'Teeth Cleaning',desc:'Professional cleaning and hygiene care to keep your smile healthy and bright.'},
+    {icon:'💎',title:'Teeth Whitening',desc:'Dramatically whiten your smile in a single visit with our in-office treatment.'},
+    {icon:'👑',title:'Dental Crowns',desc:'Durable, tooth-colored crowns that protect and restore damaged teeth.'},
+    {icon:'🌟',title:'Porcelain Veneers',desc:'Ultra-thin porcelain shells that create a flawlessly beautiful smile.'},
+    {icon:'🔬',title:'Root Canal',desc:'Comfortable, effective treatment to save damaged teeth and relieve pain.'},
+    {icon:'👶',title:'Pediatric Care',desc:'Gentle, fun dental care designed to create positive experiences for kids.'},
+  ];
+  return <section style={{padding:'100px 24px',background:C.grayLight}}>
+    <div style={{maxWidth:'1200px',margin:'0 auto'}}>
+      <div style={{textAlign:'center',marginBottom:'60px'}}>
+        <SectionTag>Our Services</SectionTag>
+        <Heading level={2} center style={{marginBottom:'16px'}}>Comprehensive Dental Care<br/>for the Whole Family</Heading>
+        <p style={{color:C.textMuted,fontSize:'1.1rem',maxWidth:'520px',margin:'0 auto'}}>From routine cleanings to complete smile makeovers, we offer everything your family needs under one roof.</p>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'20px'}}>
+        {services.map((s,i)=><ServiceCard key={s.title} {...s} delay={i*0.07}/>)}
+      </div>
+      <div style={{textAlign:'center',marginTop:'48px'}}>
+        <Btn variant="navy" onClick={()=>setPage('services')}>View All Services →</Btn>
+      </div>
+    </div>
+  </section>;
+}
+
+function ServiceCard({icon,title,desc,delay=0}){
+  const [hov,setHov]=useState(false);
+  return <div onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} style={{background:C.white,borderRadius:'16px',padding:'28px 24px',boxShadow:hov?'0 12px 40px rgba(27,48,112,0.14)':'0 2px 12px rgba(27,48,112,0.06)',transform:hov?'translateY(-6px)':'none',transition:'all 0.3s ease',cursor:'default',borderTop:hov?`3px solid ${C.red}`:`3px solid transparent`}}>
+    <div style={{fontSize:'2.2rem',marginBottom:'16px'}}>{icon}</div>
+    <h3 style={{fontFamily:'Playfair Display,serif',fontSize:'1.15rem',fontWeight:700,color:C.navy,marginBottom:'10px'}}>{title}</h3>
+    <p style={{fontSize:'13.5px',color:C.textMuted,lineHeight:1.7}}>{desc}</p>
+  </div>;
+}
+
+function WhyChooseUs(){
+  const reasons=[
+    {icon:'🏆',title:'Award-Winning Care',desc:'Recognized as a top Frisco dental practice for patient satisfaction and clinical excellence.'},
+    {icon:'🔬',title:'Advanced Technology',desc:'Digital X-rays, 3D imaging, and same-day CEREC crowns for precise, efficient treatment.'},
+    {icon:'💙',title:'Gentle Dentistry',desc:'We specialize in anxiety-free dentistry with a calm, caring approach for nervous patients.'},
+    {icon:'💳',title:'Flexible Payment',desc:'Interest-free financing, insurance billing, and transparent pricing with no surprises.'},
+    {icon:'⏰',title:'Convenient Hours',desc:'Early morning, evening, and Saturday appointments to fit your busy schedule.'},
+    {icon:'🚨',title:'Emergency Care',desc:'Same-day emergency appointments available. We\'re here when you need us most.'},
+  ];
+  return <section style={{padding:'100px 24px',background:C.white}}>
+    <div style={{maxWidth:'1200px',margin:'0 auto'}}>
+      <div style={{textAlign:'center',marginBottom:'60px'}}>
+        <SectionTag>Why Choose Us</SectionTag>
+        <Heading level={2} center>The Great Smiles Difference</Heading>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'32px'}}>
+        {reasons.map(r=><div key={r.title} style={{display:'flex',gap:'20px',alignItems:'flex-start'}}>
+          <div style={{width:'52px',height:'52px',borderRadius:'14px',background:`linear-gradient(135deg,${C.navy}12,${C.red}08)`,border:`1px solid ${C.grayMid}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.5rem',flexShrink:0}}>{r.icon}</div>
+          <div>
+            <h3 style={{fontFamily:'Playfair Display,serif',fontSize:'1.1rem',fontWeight:700,color:C.navy,marginBottom:'8px'}}>{r.title}</h3>
+            <p style={{fontSize:'13.5px',color:C.textMuted,lineHeight:1.7}}>{r.desc}</p>
+          </div>
+        </div>)}
+      </div>
+    </div>
+  </section>;
+}
+
+function MeetDentist(){
+  return <section style={{padding:'100px 24px',background:`linear-gradient(160deg,${C.navyDark} 0%,${C.navy} 100%)`,position:'relative',overflow:'hidden'}}>
+    <div style={{position:'absolute',right:'-100px',top:'50%',transform:'translateY(-50%)',width:'500px',height:'500px',borderRadius:'50%',background:'rgba(204,34,41,0.06)',filter:'blur(80px)',pointerEvents:'none'}}></div>
+    <div style={{maxWidth:'1200px',margin:'0 auto',display:'grid',gridTemplateColumns:'1fr 1fr',gap:'80px',alignItems:'center',position:'relative',zIndex:1}}>
+      <div>
+        <SectionTag>Meet Your Doctor</SectionTag>
+        <Heading level={2} light style={{marginBottom:'20px'}}>Your Confident<br/>Smile Starts Here</Heading>
+        <p style={{color:'rgba(255,255,255,0.75)',lineHeight:1.8,marginBottom:'16px',fontSize:'1.05rem'}}>
+          <DrName light>Dr. Sultana</DrName> is a proud graduate of the University of Texas School of Dentistry and has dedicated her career to creating beautiful, healthy smiles for patients of all ages.
+        </p>
+        <p style={{color:'rgba(255,255,255,0.75)',lineHeight:1.8,marginBottom:'32px',fontSize:'1.05rem'}}>
+          Her approach combines clinical excellence with genuine warmth — she believes dentistry should be comfortable, educational, and even enjoyable.
+        </p>
+        <div style={{display:'flex',gap:'16px',flexWrap:'wrap',marginBottom:'36px'}}>
+          {['UT School of Dentistry','15+ Years Experience','Invisalign Certified','CEREC Specialist'].map(c=><div key={c} style={{background:'rgba(255,255,255,0.10)',backdropFilter:'blur(8px)',border:'1px solid rgba(255,255,255,0.15)',borderRadius:'50px',padding:'8px 16px',fontSize:'13px',color:'rgba(255,255,255,0.85)',fontWeight:500}}>{c}</div>)}
+        </div>
+        <Btn onClick={()=>{}}>Schedule with Dr. Sultana →</Btn>
+      </div>
+      <div style={{position:'relative'}}>
+        <div style={{borderRadius:'20px',overflow:'hidden',boxShadow:'0 20px 60px rgba(0,0,0,0.35)'}}>
+          <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=700&q=80" alt="Dr. Sultana" style={{width:'100%',height:'480px',objectFit:'cover',display:'block'}} onError={e=>{e.target.outerHTML=`<div style="width:100%;height:480px;background:rgba(255,255,255,0.05);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="15" r="8" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/><path d="M4 38c0-8.837 7.163-16 16-16s16 7.163 16 16" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/></svg><span style="font-family:monospace;font-size:11px;color:rgba(255,255,255,0.35)">Dr. Sultana portrait photo</span></div>`;}}/>
+        </div>
+        <div style={{position:'absolute',bottom:'-16px',left:'24px',background:C.red,borderRadius:'12px',padding:'14px 20px',boxShadow:'0 8px 25px rgba(204,34,41,0.4)'}}>
+          <div style={{fontSize:'12px',color:'rgba(255,255,255,0.85)',fontWeight:500}}>⭐⭐⭐⭐⭐ 500+ Reviews</div>
+          <div style={{fontSize:'13px',color:'white',fontWeight:700,marginTop:'2px'}}>"Gentle, expert, caring"</div>
+        </div>
+      </div>
+    </div>
+  </section>;
+}
+
+function Testimonials(){
+  const reviews=[
+    {name:'Jennifer M.',loc:'Frisco, TX',text:'Dr. Sultana and her team are absolutely incredible. I used to fear the dentist, but now I look forward to my visits. They transformed my smile with Invisalign!',rating:5},
+    {name:'Robert K.',loc:'Allen, TX',text:'Had a dental emergency and they saw me the same day. Completely painless root canal — I couldn\'t believe it. The whole staff made me feel so at ease.',rating:5},
+    {name:'Amanda L.',loc:'McKinney, TX',text:'Best dental experience I\'ve ever had. Transparent pricing, no upselling, just honest, excellent care. My whole family comes here now.',rating:5},
+    {name:'David C.',loc:'Plano, TX',text:'Got dental implants here after years of putting it off. The result is life-changing. Dr. Sultana is truly a perfectionist in the best possible way.',rating:5},
+  ];
+  const [active,setActive]=useState(0);
+  useEffect(()=>{const t=setInterval(()=>setActive(a=>(a+1)%reviews.length),5000);return()=>clearInterval(t);},[]);
+  return <section style={{padding:'100px 24px',background:C.grayLight}}>
+    <div style={{maxWidth:'1200px',margin:'0 auto'}}>
+      <div style={{textAlign:'center',marginBottom:'60px'}}>
+        <SectionTag>Patient Stories</SectionTag>
+        <Heading level={2} center>What Our Patients Say</Heading>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'20px'}}>
+        {reviews.map((r,i)=><ReviewCard key={r.name} {...r} featured={i===active}/>)}
+      </div>
+      <div style={{display:'flex',justifyContent:'center',gap:'8px',marginTop:'32px'}}>
+        {reviews.map((_,i)=><div key={i} onClick={()=>setActive(i)} style={{width:i===active?28:8,height:'8px',borderRadius:'4px',background:i===active?C.red:C.grayMid,transition:'all 0.3s ease',cursor:'pointer'}}></div>)}
+      </div>
+    </div>
+  </section>;
+}
+
+function ReviewCard({name,loc,text,rating,featured}){
+  return <div style={{background:featured?C.navy:C.white,borderRadius:'16px',padding:'28px',boxShadow:featured?`0 12px 40px rgba(27,48,112,0.25)`:'0 2px 12px rgba(27,48,112,0.06)',transition:'all 0.4s ease',transform:featured?'scale(1.02)':'scale(1)'}}>
+    <div style={{display:'flex',gap:'2px',marginBottom:'16px'}}>
+      {'⭐'.repeat(rating).split('').map((_,i)=><span key={i} style={{fontSize:'14px'}}>⭐</span>)}
+    </div>
+    <p style={{fontSize:'14px',lineHeight:1.75,color:featured?'rgba(255,255,255,0.85)':C.textMuted,marginBottom:'20px',fontStyle:'italic'}}>"{text}"</p>
+    <div>
+      <div style={{fontWeight:700,fontSize:'14px',color:featured?C.white:C.navy}}>{name}</div>
+      <div style={{fontSize:'12px',color:featured?'rgba(255,255,255,0.55)':C.textLight}}>{loc}</div>
+    </div>
+  </div>;
+}
+
+function Pricing({setPage}){
+  const plans=[
+    {title:'New Patient Special',price:'$99',orig:'$250',items:['Comprehensive Exam','Full X-Rays','Professional Cleaning','Personalized Care Plan'],popular:false},
+    {title:'Smile Makeover',price:'From $299/mo',orig:null,items:['Invisalign Treatment','Teeth Whitening','Porcelain Veneers Consult','0% Financing Available'],popular:true},
+    {title:'Implant Consultation',price:'Free',orig:null,items:['3D Implant Imaging','Treatment Planning','Cost & Finance Review','Same-Day Quotes'],popular:false},
+  ];
+  return <section style={{padding:'100px 24px',background:C.white}}>
+    <div style={{maxWidth:'1200px',margin:'0 auto'}}>
+      <div style={{textAlign:'center',marginBottom:'60px'}}>
+        <SectionTag>Pricing & Offers</SectionTag>
+        <Heading level={2} center>Transparent, Affordable Care</Heading>
+        <p style={{color:C.textMuted,marginTop:'12px',fontSize:'1.05rem'}}>No hidden fees. No surprises. Just honest dentistry.</p>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'24px'}}>
+        {plans.map(p=><PricingCard key={p.title} {...p} setPage={setPage}/>)}
+      </div>
+    </div>
+  </section>;
+}
+
+function PricingCard({title,price,orig,items,popular,setPage}){
+  const [hov,setHov]=useState(false);
+  return <div onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} style={{border:popular?`2px solid ${C.red}`:`2px solid ${hov?C.navy:C.grayMid}`,borderRadius:'20px',padding:'36px 28px',background:popular?`linear-gradient(160deg,${C.navy} 0%,${C.navyDark} 100%)`:C.white,transition:'all 0.3s ease',transform:hov?'translateY(-4px)':'none',boxShadow:hov?'0 12px 40px rgba(27,48,112,0.15)':'none',position:'relative'}}>
+    {popular&&<div style={{position:'absolute',top:'-14px',left:'50%',transform:'translateX(-50%)',background:C.red,color:'white',fontSize:'12px',fontWeight:700,padding:'5px 18px',borderRadius:'50px',letterSpacing:'0.05em'}}>MOST POPULAR</div>}
+    <h3 style={{fontFamily:'Playfair Display,serif',fontSize:'1.2rem',fontWeight:700,color:popular?C.white:C.navy,marginBottom:'12px'}}>{title}</h3>
+    <div style={{display:'flex',alignItems:'baseline',gap:'8px',marginBottom:'4px'}}>
+      <span style={{fontSize:'2rem',fontWeight:700,color:popular?C.white:C.navy,fontFamily:'Playfair Display,serif'}}>{price}</span>
+    </div>
+    {orig&&<div style={{fontSize:'13px',color:popular?'rgba(255,255,255,0.55)':C.textLight,textDecoration:'line-through',marginBottom:'24px'}}>{orig} regular price</div>}
+    <div style={{height:'1px',background:popular?'rgba(255,255,255,0.15)':C.grayMid,margin:'20px 0'}}></div>
+    <ul style={{listStyle:'none',marginBottom:'28px'}}>
+      {items.map(it=><li key={it} style={{display:'flex',gap:'10px',alignItems:'flex-start',marginBottom:'10px',fontSize:'14px',color:popular?'rgba(255,255,255,0.8)':C.textMuted}}>
+        <span style={{color:C.red,fontWeight:700,flexShrink:0}}>✓</span>{it}
+      </li>)}
+    </ul>
+    <Btn variant={popular?'primary':'ghost'} onClick={()=>setPage('book')} style={{width:'100%',justifyContent:'center'}}>Get Started</Btn>
+  </div>;
+}
+
+function CTASection({setPage}){
+  return <section style={{padding:'100px 24px',background:`linear-gradient(135deg,${C.red} 0%,#A01820 100%)`,position:'relative',overflow:'hidden'}}>
+    <div style={{position:'absolute',top:'-80px',right:'-80px',width:'400px',height:'400px',borderRadius:'50%',background:'rgba(255,255,255,0.06)',pointerEvents:'none'}}></div>
+    <div style={{position:'absolute',bottom:'-60px',left:'-60px',width:'300px',height:'300px',borderRadius:'50%',background:'rgba(0,0,0,0.06)',pointerEvents:'none'}}></div>
+    <div style={{maxWidth:'800px',margin:'0 auto',textAlign:'center',position:'relative',zIndex:1}}>
+      <Heading level={2} light center style={{marginBottom:'20px'}}>Ready for Your Best Smile?</Heading>
+      <p style={{color:'rgba(255,255,255,0.85)',fontSize:'1.15rem',lineHeight:1.7,marginBottom:'40px'}}>Join thousands of happy patients in Frisco. Book your appointment today and take the first step toward the smile you deserve.</p>
+      <div style={{display:'flex',gap:'16px',justifyContent:'center',flexWrap:'wrap'}}>
+        <Btn variant="outline" onClick={()=>setPage('book')} style={{fontSize:'16px',padding:'16px 36px',borderColor:'white',color:'white'}}>📅 Book Online — It's Free</Btn>
+        <Btn onClick={()=>window.open('tel:+14695550100')} style={{background:'white',color:C.red,fontSize:'16px',padding:'16px 36px'}}>📞 Call (469) 555-0100</Btn>
+      </div>
+    </div>
+  </section>;
+}
+
+function ContactPreview({setPage}){
+  const hours=[{day:'Mon – Thu',time:'8:00 AM – 6:00 PM'},{day:'Friday',time:'8:00 AM – 4:00 PM'},{day:'Saturday',time:'9:00 AM – 2:00 PM'},{day:'Sunday',time:'Closed'}];
+  return <section style={{padding:'100px 24px',background:C.cream}}>
+    <div style={{maxWidth:'1200px',margin:'0 auto',display:'grid',gridTemplateColumns:'1fr 1fr',gap:'80px',alignItems:'start'}}>
+      <div>
+        <SectionTag>Find Us</SectionTag>
+        <Heading level={2} style={{marginBottom:'28px'}}>Visit Our Frisco Office</Heading>
+        <div style={{display:'flex',flexDirection:'column',gap:'20px'}}>
+          <InfoBlock icon="📍" title="Address">5200 Legacy Drive, Suite 200<br/>Frisco, TX 75034</InfoBlock>
+          <InfoBlock icon="📞" title="Phone">(469) 555-0100</InfoBlock>
+          <InfoBlock icon="✉️" title="Email">hello@greatsmilesdental.com</InfoBlock>
+        </div>
+        <div style={{marginTop:'36px'}}>
+          <h4 style={{fontFamily:'Playfair Display,serif',fontWeight:700,color:C.navy,marginBottom:'16px'}}>Office Hours</h4>
+          {hours.map(h=><div key={h.day} style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:`1px solid ${C.grayMid}`,fontSize:'14px'}}>
+            <span style={{color:C.text,fontWeight:500}}>{h.day}</span>
+            <span style={{color:h.time==='Closed'?C.red:C.textMuted}}>{h.time}</span>
+          </div>)}
+        </div>
+      </div>
+      <div style={{borderRadius:'20px',overflow:'hidden',boxShadow:'0 8px 30px rgba(27,48,112,0.10)',height:'400px',background:C.grayLight,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:'12px',border:`1px solid ${C.grayMid}`}}>
+        <span style={{fontSize:'2rem'}}>🗺️</span>
+        <span style={{fontFamily:'monospace',fontSize:'12px',color:C.textLight}}>Google Maps embed</span>
+        <span style={{fontFamily:'monospace',fontSize:'11px',color:C.textLight}}>5200 Legacy Drive, Frisco TX</span>
+      </div>
+    </div>
+  </section>;
+}
+
+function InfoBlock({icon,title,children}){
+  return <div style={{display:'flex',gap:'16px',alignItems:'flex-start'}}>
+    <div style={{width:'44px',height:'44px',borderRadius:'12px',background:`linear-gradient(135deg,${C.navy}12,${C.red}08)`,border:`1px solid ${C.grayMid}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.2rem',flexShrink:0}}>{icon}</div>
+    <div><div style={{fontSize:'12px',fontWeight:700,letterSpacing:'0.06em',textTransform:'uppercase',color:C.textMuted,marginBottom:'4px'}}>{title}</div><div style={{fontSize:'14.5px',color:C.text,lineHeight:1.6}}>{children}</div></div>
+  </div>;
+}
+
+// ── ABOUT PAGE ───────────────────────────────────────────────────────────────
+function AboutPage({setPage}){
+  const team=[
+    {name:'Lisa Torres',role:'Dental Hygienist',note:'10+ years of gentle care'},
+    {name:'Maria Chen',role:'Patient Coordinator',note:'Your first friendly face'},
+    {name:'James Okafor',role:'Dental Assistant',note:'CEREC & digital imaging'},
+    {name:'Priya Sharma',role:'Office Manager',note:'Insurance & billing expert'},
+  ];
+  const values=[
+    {icon:'❤️',title:'Compassion First',desc:'We treat every patient like family, with kindness and genuine concern.'},
+    {icon:'🎯',title:'Clinical Excellence',desc:'Continuous education and advanced technology for the best outcomes.'},
+    {icon:'🔍',title:'Transparency',desc:'Clear communication about your dental health and treatment costs.'},
+    {icon:'🌱',title:'Long-Term Relationships',desc:'We invest in your smile for years, not just a single appointment.'},
+  ];
+  return <div style={{paddingTop:'80px'}}>
+    {/* Hero */}
+    <div style={{background:`linear-gradient(160deg,${C.navyDark} 0%,${C.navy} 100%)`,padding:'80px 24px',textAlign:'center'}}>
+      <div style={{maxWidth:'700px',margin:'0 auto'}}>
+        <SectionTag>Our Story</SectionTag>
+        <Heading level={1} light center style={{marginBottom:'20px'}}>More Than a Dental Office —<br/>We're Your Smile Partner</Heading>
+        <p style={{color:'rgba(255,255,255,0.75)',fontSize:'1.1rem',lineHeight:1.7}}>Founded in 2009 with a simple mission: deliver world-class dental care with small-town warmth, right here in Frisco, Texas.</p>
+      </div>
+    </div>
+    {/* Story */}
+    <section style={{padding:'100px 24px',background:C.cream}}>
+      <div style={{maxWidth:'1200px',margin:'0 auto',display:'grid',gridTemplateColumns:'1fr 1fr',gap:'80px',alignItems:'center'}}>
+        <div>
+          <SectionTag>Our Mission</SectionTag>
+          <Heading level={2} style={{marginBottom:'20px'}}>Dentistry That Changes Lives</Heading>
+          {['When Dr. Zakia Sultana opened Great Smiles Dental in 2009, she had a vision: to create a practice where patients looked forward to their appointments. Where anxiety was replaced with confidence, and where every treatment was delivered with technical mastery and human warmth.','Today, that vision is alive in every interaction — from the moment you walk through our doors to the day you leave with your healthiest, most beautiful smile yet. We are proud to be Frisco\'s most trusted dental home.'].map((t,i)=><p key={i} style={{color:C.textMuted,lineHeight:1.8,marginBottom:'16px',fontSize:'1.05rem'}}>{t}</p>)}
+        </div>
+        <div style={{borderRadius:'20px',overflow:'hidden',boxShadow:'0 20px 60px rgba(27,48,112,0.15)'}}>
+          <img src="https://images.unsplash.com/photo-1629909615184-74f495363b67?w=800&q=80" alt="Clinic" style={{width:'100%',height:'420px',objectFit:'cover'}} onError={e=>{e.target.outerHTML=`<div style="width:100%;height:420px;background:#F5F4F0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:12px;color:#9CA3AF">dental office interior photo</div>`;}}/>
+        </div>
+      </div>
+    </section>
+    {/* Values */}
+    <section style={{padding:'80px 24px',background:C.grayLight}}>
+      <div style={{maxWidth:'1200px',margin:'0 auto'}}>
+        <div style={{textAlign:'center',marginBottom:'52px'}}><SectionTag>Our Values</SectionTag><Heading level={2} center>What We Stand For</Heading></div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'24px'}}>
+          {values.map(v=><div key={v.title} style={{background:C.white,borderRadius:'16px',padding:'28px 24px',boxShadow:'0 2px 12px rgba(27,48,112,0.06)',textAlign:'center'}}>
+            <div style={{fontSize:'2rem',marginBottom:'14px'}}>{v.icon}</div>
+            <h3 style={{fontFamily:'Playfair Display,serif',fontSize:'1.1rem',fontWeight:700,color:C.navy,marginBottom:'10px'}}>{v.title}</h3>
+            <p style={{fontSize:'13.5px',color:C.textMuted,lineHeight:1.7}}>{v.desc}</p>
+          </div>)}
+        </div>
+      </div>
+    </section>
+    {/* Team */}
+    <section style={{padding:'100px 24px',background:C.white}}>
+      <div style={{maxWidth:'1200px',margin:'0 auto'}}>
+        <div style={{textAlign:'center',marginBottom:'60px'}}><SectionTag>The Team</SectionTag><Heading level={2} center>Friendly Faces Behind Every Smile</Heading></div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'24px'}}>
+          {team.map(m=><div key={m.name} style={{borderRadius:'16px',overflow:'hidden',boxShadow:'0 4px 20px rgba(27,48,112,0.08)',background:C.cream}}>
+            <div style={{height:'200px',background:`linear-gradient(135deg,${C.navy}12,${C.grayMid})`,display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <svg width="60" height="60" viewBox="0 0 60 60" fill="none"><circle cx="30" cy="22" r="12" stroke={C.textLight} strokeWidth="1.5"/><path d="M6 58c0-13.255 10.745-24 24-24s24 10.745 24 24" stroke={C.textLight} strokeWidth="1.5"/></svg>
+            </div>
+            <div style={{padding:'20px'}}>
+              <h4 style={{fontFamily:'Playfair Display,serif',fontWeight:700,color:C.navy,marginBottom:'4px'}}>{m.name}</h4>
+              <div style={{fontSize:'13px',color:C.red,fontWeight:600,marginBottom:'6px'}}>{m.role}</div>
+              <div style={{fontSize:'12.5px',color:C.textMuted}}>{m.note}</div>
+            </div>
+          </div>)}
+        </div>
+      </div>
+    </section>
+    <CTASection setPage={setPage}/>
+  </div>;
+}
+
+// ── SERVICES PAGE ─────────────────────────────────────────────────────────────
+function ServicesPage({setPage}){
+  const categories=[
+    {id:'general',label:'General Dentistry',icon:'🦷',services:[
+      {title:'Routine Cleanings & Exams',desc:'Preventive care is the cornerstone of long-term dental health. Our thorough exams catch problems early.',benefits:['Early cavity detection','Gum disease screening','Cancer screening','Digital X-rays']},
+      {title:'Dental Fillings',desc:'Tooth-colored composite fillings restore strength and beauty to damaged teeth.',benefits:['Matches natural tooth color','Metal-free options','Same-day treatment','Long-lasting results']},
+      {title:'Tooth Extractions',desc:'When necessary, we perform gentle extractions with minimal discomfort and fast recovery.',benefits:['Gentle technique','Sedation available','Implant planning','Fast healing protocol']},
+      {title:'Emergency Dental Care',desc:'Dental emergencies don\'t wait. We offer same-day appointments for urgent situations.',benefits:['Same-day availability','Pain relief focused','After-hours guidance','Weekend appointments']},
+    ]},
+    {id:'cosmetic',label:'Cosmetic Dentistry',icon:'✨',services:[
+      {title:'Teeth Whitening',desc:'Professional in-office whitening delivers dramatic results in just one visit.',benefits:['Up to 8 shades whiter','1-hour in-office treatment','Take-home kits available','Long-lasting results']},
+      {title:'Porcelain Veneers',desc:'Ultra-thin porcelain shells crafted to create a flawlessly beautiful smile.',benefits:['Natural appearance','Stain-resistant','Minimal tooth prep','Custom designed']},
+      {title:'Invisalign',desc:'Clear aligners that straighten your teeth discreetly and comfortably.',benefits:['Removable & comfortable','Virtually invisible','Faster than braces','No dietary restrictions']},
+      {title:'Smile Makeover',desc:'A comprehensive transformation combining multiple cosmetic treatments.',benefits:['Fully customized plan','Combines best treatments','Digital smile preview','Financing available']},
+    ]},
+    {id:'restorative',label:'Restorative Dentistry',icon:'👑',services:[
+      {title:'Dental Implants',desc:'The gold standard for replacing missing teeth — permanent, natural-feeling, and beautiful.',benefits:['Looks & feels natural','Lifetime durability','Preserves jawbone','No adhesives needed']},
+      {title:'Dental Crowns',desc:'Same-day CEREC crowns restore damaged teeth with precision-milled ceramic.',benefits:['Same-day CEREC crowns','Metal-free options','Perfect color match','Protects weak teeth']},
+      {title:'Dental Bridges',desc:'Fixed bridges replace missing teeth and restore your smile and bite.',benefits:['Fixed — no removal','Natural appearance','Restores bite function','Supported by implants or teeth']},
+      {title:'Root Canal Therapy',desc:'Modern root canals are comfortable and tooth-saving. Most patients report little to no pain.',benefits:['Save your natural tooth','Virtually painless','Same-day treatment','No recovery needed']},
+    ]},
+    {id:'pediatric',label:'Pediatric Dentistry',icon:'👶',services:[
+      {title:'Children\'s Cleanings',desc:'Fun, gentle cleanings that teach kids great habits and make dentistry enjoyable.',benefits:['Kid-friendly environment','Educational & fun','Fluoride treatment','Dental sealants']},
+      {title:'Dental Sealants',desc:'Protective coatings that prevent cavities in children\'s back teeth.',benefits:['Prevents up to 80% of cavities','Quick & painless','Lasts 5-10 years','Highly recommended by ADA']},
+      {title:'Orthodontic Evaluation',desc:'Early evaluation ensures your child\'s smile develops correctly.',benefits:['Ages 7+ screening','Early intervention saves time','Space maintainers','Invisalign Teen available']},
+      {title:'Pulp Therapy',desc:'Baby tooth root canals that save primary teeth until permanent ones are ready.',benefits:['Saves baby teeth','Prevents premature loss','Pain-free with sedation','Protects permanent teeth']},
+    ]},
+  ];
+  const [active,setActive]=useState('general');
+  const cat=categories.find(c=>c.id===active);
+  return <div style={{paddingTop:'80px'}}>
+    <div style={{background:`linear-gradient(160deg,${C.navyDark} 0%,${C.navy} 100%)`,padding:'80px 24px',textAlign:'center'}}>
+      <SectionTag>Our Services</SectionTag>
+      <Heading level={1} light center style={{marginBottom:'16px'}}>Comprehensive Care Under One Roof</Heading>
+      <p style={{color:'rgba(255,255,255,0.72)',fontSize:'1.1rem',maxWidth:'550px',margin:'0 auto'}}>From your child's first check-up to full-mouth restoration, we have you covered.</p>
+    </div>
+    {/* Category Tabs */}
+    <div style={{background:C.white,borderBottom:`1px solid ${C.grayMid}`,position:'sticky',top:'68px',zIndex:100}}>
+      <div style={{maxWidth:'1200px',margin:'0 auto',display:'flex',gap:'4px',padding:'0 24px',overflowX:'auto'}}>
+        {categories.map(c=><button key={c.id} onClick={()=>setActive(c.id)} style={{background:'none',border:'none',padding:'20px 24px',cursor:'pointer',fontFamily:'Inter,sans-serif',fontSize:'14px',fontWeight:600,color:active===c.id?C.navy:C.textMuted,borderBottom:active===c.id?`3px solid ${C.red}`:'3px solid transparent',whiteSpace:'nowrap',transition:'all 0.2s'}}>{c.icon} {c.label}</button>)}
+      </div>
+    </div>
+    <section style={{padding:'80px 24px',background:C.cream}}>
+      <div style={{maxWidth:'1200px',margin:'0 auto'}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'24px'}}>
+          {cat.services.map(s=><ServiceDetailCard key={s.title} {...s} setPage={setPage}/>)}
+        </div>
+      </div>
+    </section>
+    <CTASection setPage={setPage}/>
+  </div>;
+}
+
+function ServiceDetailCard({title,desc,benefits,setPage}){
+  const [hov,setHov]=useState(false);
+  return <div onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} style={{background:C.white,borderRadius:'16px',padding:'32px',boxShadow:hov?'0 12px 40px rgba(27,48,112,0.12)':'0 2px 12px rgba(27,48,112,0.06)',transition:'all 0.3s',transform:hov?'translateY(-4px)':'none',border:`1px solid ${hov?C.grayMid:C.grayMid}`}}>
+    <h3 style={{fontFamily:'Playfair Display,serif',fontSize:'1.3rem',fontWeight:700,color:C.navy,marginBottom:'12px'}}>{title}</h3>
+    <p style={{fontSize:'14px',color:C.textMuted,lineHeight:1.75,marginBottom:'20px'}}>{desc}</p>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'24px'}}>
+      {benefits.map(b=><div key={b} style={{display:'flex',gap:'8px',alignItems:'center',fontSize:'13px',color:C.text}}>
+        <span style={{color:C.red,fontWeight:700,flexShrink:0}}>✓</span>{b}
+      </div>)}
+    </div>
+    <Btn variant="ghost" onClick={()=>setPage('book')} small>Book Consultation</Btn>
+  </div>;
+}
+
+// ── BOOK PAGE ─────────────────────────────────────────────────────────────────
+function BookPage(){
+  const [form,setForm]=useState({name:'',phone:'',email:'',date:'',service:'',message:''});
+  const [step,setStep]=useState(1);
+  const [submitted,setSubmitted]=useState(false);
+  const [errors,setErrors]=useState({});
+  const services=['Routine Cleaning & Exam','Teeth Whitening','Invisalign Consultation','Dental Implants','Porcelain Veneers','Crowns & Bridges','Root Canal','Emergency Visit','Other'];
+  const update=k=>e=>setForm(f=>({...f,[k]:e.target.value}));
+  const validate=()=>{
+    const e={};
+    if(!form.name.trim())e.name='Name is required';
+    if(!form.phone.trim())e.phone='Phone is required';
+    if(!form.email.trim())e.email='Email is required';
+    else if(!/\S+@\S+\.\S+/.test(form.email))e.email='Valid email required';
+    setErrors(e);return Object.keys(e).length===0;
+  };
+  const next=()=>{if(step===1&&validate())setStep(2);else if(step===2)setSubmitted(true);};
+  const inputStyle={width:'100%',padding:'14px 16px',border:`1.5px solid ${C.grayMid}`,borderRadius:'10px',fontSize:'15px',fontFamily:'Inter,sans-serif',outline:'none',background:C.white,color:C.text,transition:'border-color 0.2s'};
+  const labelStyle={display:'block',fontSize:'13px',fontWeight:600,color:C.text,marginBottom:'6px',letterSpacing:'0.02em'};
+  if(submitted)return <div style={{paddingTop:'80px',minHeight:'100vh',background:C.cream,display:'flex',alignItems:'center',justifyContent:'center'}}>
+    <div style={{textAlign:'center',padding:'60px 40px',background:C.white,borderRadius:'24px',boxShadow:'0 10px 40px rgba(27,48,112,0.10)',maxWidth:'500px',margin:'24px'}}>
+      <div style={{fontSize:'3.5rem',marginBottom:'20px'}}>🎉</div>
+      <Heading level={2} center style={{marginBottom:'16px'}}>You're All Set!</Heading>
+      <p style={{color:C.textMuted,lineHeight:1.7,marginBottom:'32px'}}>We've received your appointment request. Our team will call you within 2 hours to confirm your time. Welcome to the Great Smiles family!</p>
+      <div style={{background:C.grayLight,borderRadius:'12px',padding:'20px',marginBottom:'28px',textAlign:'left'}}>
+        <div style={{fontSize:'13px',color:C.textMuted,marginBottom:'4px'}}>Appointment Request For:</div>
+        <div style={{fontWeight:700,color:C.navy,fontSize:'16px'}}>{form.name}</div>
+        <div style={{fontSize:'14px',color:C.textMuted,marginTop:'4px'}}>{form.service||'General Consultation'} · {form.date||'Flexible'}</div>
+      </div>
+      <p style={{fontSize:'13px',color:C.textMuted}}>Questions? Call <strong style={{color:C.navy}}>(469) 555-0100</strong></p>
+    </div>
+  </div>;
+  return <div style={{paddingTop:'80px',minHeight:'100vh',background:C.cream}}>
+    <div style={{background:`linear-gradient(160deg,${C.navyDark} 0%,${C.navy} 100%)`,padding:'60px 24px',textAlign:'center'}}>
+      <SectionTag>Schedule a Visit</SectionTag>
+      <Heading level={1} light center style={{marginBottom:'16px'}}>Book Your Appointment</Heading>
+      <p style={{color:'rgba(255,255,255,0.72)',fontSize:'1.05rem'}}>Quick, easy, and free. We'll confirm within 2 hours.</p>
+    </div>
+    <div style={{maxWidth:'1100px',margin:'0 auto',padding:'60px 24px',display:'grid',gridTemplateColumns:'1fr 360px',gap:'40px',alignItems:'start'}}>
+      {/* Form */}
+      <div style={{background:C.white,borderRadius:'20px',padding:'40px',boxShadow:'0 4px 30px rgba(27,48,112,0.08)'}}>
+        {/* Progress */}
+        <div style={{display:'flex',gap:'12px',alignItems:'center',marginBottom:'36px'}}>
+          {[1,2].map(n=><React.Fragment key={n}>
+            <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
+              <div style={{width:'32px',height:'32px',borderRadius:'50%',background:step>=n?C.navy:C.grayLight,color:step>=n?C.white:C.textMuted,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'14px',fontWeight:700,flexShrink:0,transition:'all 0.3s'}}>{n}</div>
+              <span style={{fontSize:'14px',fontWeight:step===n?700:500,color:step===n?C.navy:C.textMuted}}>{n===1?'Your Info':'Preferences'}</span>
+            </div>
+            {n<2&&<div style={{flex:1,height:'2px',background:step>n?C.navy:C.grayMid,borderRadius:'1px',transition:'background 0.3s'}}></div>}
+          </React.Fragment>)}
+        </div>
+        {step===1&&<div style={{display:'flex',flexDirection:'column',gap:'20px'}}>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
+            <div>
+              <label style={labelStyle}>Full Name *</label>
+              <input value={form.name} onChange={update('name')} placeholder="Jane Smith" style={{...inputStyle,borderColor:errors.name?C.red:C.grayMid}} onFocus={e=>e.target.style.borderColor=C.navy} onBlur={e=>e.target.style.borderColor=errors.name?C.red:C.grayMid}/>
+              {errors.name&&<div style={{fontSize:'12px',color:C.red,marginTop:'4px'}}>{errors.name}</div>}
+            </div>
+            <div>
+              <label style={labelStyle}>Phone Number *</label>
+              <input value={form.phone} onChange={update('phone')} placeholder="(469) 555-0000" style={{...inputStyle,borderColor:errors.phone?C.red:C.grayMid}} onFocus={e=>e.target.style.borderColor=C.navy} onBlur={e=>e.target.style.borderColor=errors.phone?C.red:C.grayMid}/>
+              {errors.phone&&<div style={{fontSize:'12px',color:C.red,marginTop:'4px'}}>{errors.phone}</div>}
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Email Address *</label>
+            <input value={form.email} onChange={update('email')} type="email" placeholder="jane@example.com" style={{...inputStyle,borderColor:errors.email?C.red:C.grayMid}} onFocus={e=>e.target.style.borderColor=C.navy} onBlur={e=>e.target.style.borderColor=errors.email?C.red:C.grayMid}/>
+            {errors.email&&<div style={{fontSize:'12px',color:C.red,marginTop:'4px'}}>{errors.email}</div>}
+          </div>
+        </div>}
+        {step===2&&<div style={{display:'flex',flexDirection:'column',gap:'20px'}}>
+          <div>
+            <label style={labelStyle}>Service Needed</label>
+            <select value={form.service} onChange={update('service')} style={{...inputStyle}} onFocus={e=>e.target.style.borderColor=C.navy} onBlur={e=>e.target.style.borderColor=C.grayMid}>
+              <option value="">Select a service...</option>
+              {services.map(s=><option key={s}>{s}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={labelStyle}>Preferred Date</label>
+            <input type="date" value={form.date} onChange={update('date')} style={inputStyle} min={new Date().toISOString().split('T')[0]} onFocus={e=>e.target.style.borderColor=C.navy} onBlur={e=>e.target.style.borderColor=C.grayMid}/>
+          </div>
+          <div>
+            <label style={labelStyle}>Additional Notes</label>
+            <textarea value={form.message} onChange={update('message')} rows={4} placeholder="Any concerns, allergies, or questions..." style={{...inputStyle,resize:'vertical'}} onFocus={e=>e.target.style.borderColor=C.navy} onBlur={e=>e.target.style.borderColor=C.grayMid}></textarea>
+          </div>
+        </div>}
+        <div style={{display:'flex',gap:'12px',marginTop:'28px',justifyContent:'space-between'}}>
+          {step>1&&<Btn variant="ghost" onClick={()=>setStep(s=>s-1)}>← Back</Btn>}
+          <div style={{marginLeft:'auto'}}><Btn onClick={next}>{step===2?'Confirm Request 🎉':'Next Step →'}</Btn></div>
+        </div>
+      </div>
+      {/* Sidebar */}
+      <div style={{display:'flex',flexDirection:'column',gap:'16px'}}>
+        <div style={{background:C.white,borderRadius:'16px',padding:'28px',boxShadow:'0 2px 12px rgba(27,48,112,0.06)'}}>
+          <h3 style={{fontFamily:'Playfair Display,serif',fontWeight:700,color:C.navy,marginBottom:'16px'}}>Why Book Online?</h3>
+          {['Instant confirmation within 2 hours','Choose your preferred time','No phone hold times','Easy rescheduling anytime'].map(t=><div key={t} style={{display:'flex',gap:'10px',alignItems:'flex-start',marginBottom:'10px',fontSize:'13.5px',color:C.textMuted}}>
+            <span style={{color:C.red,fontWeight:700,flexShrink:0}}>✓</span>{t}
+          </div>)}
+        </div>
+        <div style={{background:C.navy,borderRadius:'16px',padding:'28px',color:'white'}}>
+          <div style={{fontSize:'1.5rem',marginBottom:'10px'}}>📞</div>
+          <h4 style={{fontFamily:'Playfair Display,serif',fontWeight:700,marginBottom:'8px'}}>Prefer to Call?</h4>
+          <p style={{fontSize:'13.5px',color:'rgba(255,255,255,0.72)',marginBottom:'14px'}}>Our friendly team is ready to help Mon–Sat.</p>
+          <div style={{fontSize:'1.1rem',fontWeight:700,color:C.white}}>(469) 555-0100</div>
+        </div>
+        <div style={{background:`${C.red}12`,border:`1px solid ${C.red}25`,borderRadius:'16px',padding:'20px'}}>
+          <div style={{fontWeight:700,color:C.red,marginBottom:'6px',fontSize:'14px'}}>🎁 New Patient Special</div>
+          <div style={{fontSize:'13px',color:C.textMuted}}>Exam + X-Rays + Cleaning for just <strong style={{color:C.navy}}>$99</strong> (reg. $250)</div>
+        </div>
+      </div>
+    </div>
+  </div>;
+}
+
+// ── CONTACT PAGE ──────────────────────────────────────────────────────────────
+function ContactPage(){
+  const [form,setForm]=useState({name:'',email:'',phone:'',message:''});
+  const [sent,setSent]=useState(false);
+  const update=k=>e=>setForm(f=>({...f,[k]:e.target.value}));
+  const inputStyle={width:'100%',padding:'14px 16px',border:`1.5px solid ${C.grayMid}`,borderRadius:'10px',fontSize:'15px',fontFamily:'Inter,sans-serif',outline:'none',background:C.white,color:C.text};
+  const labelStyle={display:'block',fontSize:'13px',fontWeight:600,color:C.text,marginBottom:'6px'};
+  const hours=[{day:'Monday – Thursday',time:'8:00 AM – 6:00 PM'},{day:'Friday',time:'8:00 AM – 4:00 PM'},{day:'Saturday',time:'9:00 AM – 2:00 PM'},{day:'Sunday',time:'Closed'}];
+  return <div style={{paddingTop:'80px'}}>
+    <div style={{background:`linear-gradient(160deg,${C.navyDark} 0%,${C.navy} 100%)`,padding:'80px 24px',textAlign:'center'}}>
+      <SectionTag>Get in Touch</SectionTag>
+      <Heading level={1} light center style={{marginBottom:'16px'}}>We'd Love to Hear From You</Heading>
+      <p style={{color:'rgba(255,255,255,0.72)',fontSize:'1.1rem'}}>Questions, concerns, or just want to say hello — we're here.</p>
+    </div>
+    <section style={{padding:'80px 24px',background:C.cream}}>
+      <div style={{maxWidth:'1200px',margin:'0 auto',display:'grid',gridTemplateColumns:'1fr 1fr',gap:'60px'}}>
+        {/* Contact Info */}
+        <div>
+          <Heading level={2} style={{marginBottom:'32px'}}>Contact Information</Heading>
+          <div style={{display:'flex',flexDirection:'column',gap:'24px',marginBottom:'40px'}}>
+            <InfoBlock icon="📍" title="Office Address">5200 Legacy Drive, Suite 200<br/>Frisco, TX 75034</InfoBlock>
+            <InfoBlock icon="📞" title="Phone">(469) 555-0100</InfoBlock>
+            <InfoBlock icon="✉️" title="Email">hello@greatsmilesdental.com</InfoBlock>
+            <InfoBlock icon="🌐" title="Website">www.greatsmilesdental.com</InfoBlock>
+          </div>
+          <h4 style={{fontFamily:'Playfair Display,serif',fontWeight:700,color:C.navy,marginBottom:'16px'}}>Office Hours</h4>
+          {hours.map(h=><div key={h.day} style={{display:'flex',justifyContent:'space-between',padding:'12px 0',borderBottom:`1px solid ${C.grayMid}`,fontSize:'14px'}}>
+            <span style={{fontWeight:500,color:C.text}}>{h.day}</span>
+            <span style={{color:h.time==='Closed'?C.red:C.textMuted,fontWeight:h.time==='Closed'?600:400}}>{h.time}</span>
+          </div>)}
+        </div>
+        {/* Contact Form */}
+        {!sent?<div style={{background:C.white,borderRadius:'20px',padding:'40px',boxShadow:'0 4px 30px rgba(27,48,112,0.08)'}}>
+          <h3 style={{fontFamily:'Playfair Display,serif',fontSize:'1.4rem',fontWeight:700,color:C.navy,marginBottom:'24px'}}>Send Us a Message</h3>
+          <div style={{display:'flex',flexDirection:'column',gap:'18px'}}>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'14px'}}>
+              <div><label style={labelStyle}>Name</label><input value={form.name} onChange={update('name')} placeholder="Your name" style={inputStyle} onFocus={e=>e.target.style.borderColor=C.navy} onBlur={e=>e.target.style.borderColor=C.grayMid}/></div>
+              <div><label style={labelStyle}>Phone</label><input value={form.phone} onChange={update('phone')} placeholder="(469) 000-0000" style={inputStyle} onFocus={e=>e.target.style.borderColor=C.navy} onBlur={e=>e.target.style.borderColor=C.grayMid}/></div>
+            </div>
+            <div><label style={labelStyle}>Email</label><input value={form.email} onChange={update('email')} type="email" placeholder="you@email.com" style={inputStyle} onFocus={e=>e.target.style.borderColor=C.navy} onBlur={e=>e.target.style.borderColor=C.grayMid}/></div>
+            <div><label style={labelStyle}>Message</label><textarea value={form.message} onChange={update('message')} rows={5} placeholder="How can we help?" style={{...inputStyle,resize:'vertical'}} onFocus={e=>e.target.style.borderColor=C.navy} onBlur={e=>e.target.style.borderColor=C.grayMid}></textarea></div>
+          </div>
+          <Btn onClick={()=>setSent(true)} style={{marginTop:'24px',width:'100%',justifyContent:'center',fontSize:'16px',padding:'15px'}}>Send Message →</Btn>
+        </div>
+        :<div style={{background:C.white,borderRadius:'20px',padding:'60px 40px',boxShadow:'0 4px 30px rgba(27,48,112,0.08)',textAlign:'center'}}>
+          <div style={{fontSize:'3rem',marginBottom:'16px'}}>✅</div>
+          <Heading level={3} center style={{marginBottom:'12px'}}>Message Received!</Heading>
+          <p style={{color:C.textMuted,lineHeight:1.7}}>Thank you for reaching out. We'll get back to you within one business day. Or call us directly at <strong>(469) 555-0100</strong>.</p>
+        </div>}
+      </div>
+    </section>
+    {/* Map placeholder */}
+    <div style={{height:'350px',background:`linear-gradient(135deg,${C.navy}10,${C.grayMid})`,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:'12px',borderTop:`1px solid ${C.grayMid}`}}>
+      <span style={{fontSize:'2.5rem'}}>🗺️</span>
+      <span style={{fontFamily:'monospace',fontSize:'13px',color:C.textMuted}}>Google Maps — 5200 Legacy Drive, Frisco TX 75034</span>
+    </div>
+  </div>;
+}
+
+// ── FOOTER ────────────────────────────────────────────────────────────────────
+function Footer({setPage}){
+  const links={
+    'Quick Links':[{l:'Home',p:'home'},{l:'About Us',p:'about'},{l:'Services',p:'services'},{l:'Book Appointment',p:'book'},{l:'Contact',p:'contact'}],
+    'Services':[{l:'Dental Implants',p:'services'},{l:'Invisalign',p:'services'},{l:'Teeth Whitening',p:'services'},{l:'Dental Crowns',p:'services'},{l:'Pediatric Care',p:'services'}],
+  };
+  return <footer style={{background:C.navyDark,color:'rgba(255,255,255,0.70)',padding:'60px 24px 0'}}>
+    <div style={{maxWidth:'1200px',margin:'0 auto',display:'grid',gridTemplateColumns:'2fr 1fr 1fr 1.5fr',gap:'48px',marginBottom:'48px'}}>
+      <div>
+        <img src="uploads/great-smiles-dental-new-logo.png" alt="Great Smiles Dental" style={{height:'48px',marginBottom:'20px',filter:'brightness(0) invert(1)'}}/>
+        <p style={{fontSize:'14px',lineHeight:1.8,maxWidth:'280px',marginBottom:'24px'}}>Premium, compassionate dental care for the whole family in Frisco, Texas. Your smile is our mission.</p>
+        <div style={{display:'flex',gap:'12px'}}>
+          {['f','in','ig','yt'].map(s=><div key={s} style={{width:'36px',height:'36px',borderRadius:'8px',background:'rgba(255,255,255,0.10)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',cursor:'pointer',transition:'background 0.2s'}} onMouseEnter={e=>e.target.style.background='rgba(255,255,255,0.20)'} onMouseLeave={e=>e.target.style.background='rgba(255,255,255,0.10)'}>{s}</div>)}
+        </div>
+      </div>
+      {Object.entries(links).map(([title,items])=><div key={title}>
+        <h4 style={{color:C.white,fontFamily:'Playfair Display,serif',fontWeight:700,marginBottom:'16px'}}>{title}</h4>
+        <ul style={{listStyle:'none'}}>
+          {items.map(({l,p})=><li key={l} style={{marginBottom:'10px'}}><span onClick={()=>setPage(p)} style={{fontSize:'14px',cursor:'pointer',transition:'color 0.2s'}} onMouseEnter={e=>e.target.style.color='white'} onMouseLeave={e=>e.target.style.color=''}>{l}</span></li>)}
+        </ul>
+      </div>)}
+      <div>
+        <h4 style={{color:C.white,fontFamily:'Playfair Display,serif',fontWeight:700,marginBottom:'16px'}}>Contact</h4>
+        <div style={{fontSize:'14px',lineHeight:1.9}}>
+          <div>📍 5200 Legacy Drive, Suite 200</div>
+          <div style={{paddingLeft:'20px',marginBottom:'4px'}}>Frisco, TX 75034</div>
+          <div>📞 (469) 555-0100</div>
+          <div>✉️ hello@greatsmilesdental.com</div>
+          <div style={{marginTop:'12px',color:'rgba(255,255,255,0.50)',fontSize:'13px'}}>Mon–Fri 8am–6pm<br/>Sat 9am–2pm</div>
+        </div>
+      </div>
+    </div>
+    <div style={{borderTop:'1px solid rgba(255,255,255,0.10)',padding:'20px 0',textAlign:'center',fontSize:'13px',color:'rgba(255,255,255,0.40)'}}>
+      © 2024 Great Smiles Dental. All rights reserved. | 5200 Legacy Drive, Frisco TX 75034
+    </div>
+  </footer>;
+}
+
+// ── TWEAKS ────────────────────────────────────────────────────────────────────
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accentColor": "#b9393f",
+  "navyColor": "#243569",
+  "headingFont": "Playfair Display",
+  "heroHeadline": "Your Confident Smile Starts Here",
+  "showPricing": true
+}/*EDITMODE-END*/;
+
+// ── APP ───────────────────────────────────────────────────────────────────────
+function App(){
+  const [page,setPage]=useState('home');
+  const [tweaks,setTweak]=useTweaks(TWEAK_DEFAULTS);
+  // Apply tweaks
+  useEffect(()=>{
+    document.documentElement.style.setProperty('--red',tweaks.accentColor);
+    document.documentElement.style.setProperty('--navy',tweaks.navyColor);
+  },[tweaks.accentColor,tweaks.navyColor]);
+  const navigate=p=>{setPage(p);window.scrollTo({top:0,behavior:'smooth'});};
+  return <>
+    <Header page={page} setPage={navigate} tweaks={tweaks}/>
+    <main>
+      {page==='home'&&<>
+        <Hero setPage={navigate} headline={tweaks.heroHeadline}/>
+        <TrustBar/>
+        <InsuranceBar/>
+        <AboutPreview setPage={navigate}/>
+        <ServicesOverview setPage={navigate}/>
+        <WhyChooseUs/>
+        <MeetDentist/>
+        <Testimonials/>
+        {tweaks.showPricing&&<Pricing setPage={navigate}/>}
+        <CTASection setPage={navigate}/>
+        <ContactPreview setPage={navigate}/>
+      </>}
+      {page==='about'&&<AboutPage setPage={navigate}/>}
+      {page==='services'&&<ServicesPage setPage={navigate}/>}
+      {page==='book'&&<BookPage/>}
+      {page==='contact'&&<ContactPage/>}
+    </main>
+    <Footer setPage={navigate}/>
+    <TweaksPanel>
+      <TweakSection title="Brand Colors">
+        <TweakColor id="accentColor" label="Accent Red" value={tweaks.accentColor} onChange={v=>setTweak('accentColor',v)}/>
+        <TweakColor id="navyColor" label="Primary Navy" value={tweaks.navyColor} onChange={v=>setTweak('navyColor',v)}/>
+      </TweakSection>
+      <TweakSection title="Hero">
+        <TweakText id="heroHeadline" label="Headline" value={tweaks.heroHeadline} onChange={v=>setTweak('heroHeadline',v)}/>
+      </TweakSection>
+      <TweakSection title="Sections">
+        <TweakToggle id="showPricing" label="Show Pricing Section" value={tweaks.showPricing} onChange={v=>setTweak('showPricing',v)}/>
+      </TweakSection>
+    </TweaksPanel>
+  </>;
+}
+
+const root=ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App/>);
+</script>
+</body>
+</html>
